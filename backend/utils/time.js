@@ -1,5 +1,4 @@
 function mnNowParts(date = new Date()) {
-  // Get Mongolia time parts (Asia/Ulaanbaatar) using Intl (works on any server location)
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Ulaanbaatar",
     year: "numeric",
@@ -21,7 +20,7 @@ function mnNowParts(date = new Date()) {
   const mi = get("minute");
   const ss = get("second");
 
-  // Mongolia (Ulaanbaatar) is UTC+08:00
+  // Ulaanbaatar is UTC+08:00
   const iso = `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}+08:00`;
 
   return {
@@ -39,9 +38,16 @@ function minutesWorkedFromISO(checkInISO, checkOutISO) {
   return Math.max(0, Math.floor((outMs - inMs) / 60000));
 }
 
-// Fixed unpaid break: 60 minutes per completed shift
+/**
+ * Paid minutes rule:
+ * - still subtract 60 minutes (1 hour break)
+ * - BUT if they worked at least 1 minute, pay at least 1 minute
+ *   so salary is always estimated even for very short work.
+ */
 function paidMinutes(workedMinutes) {
-  return Math.max(0, workedMinutes - 60);
+  const w = Math.max(0, Math.floor(workedMinutes));
+  if (w === 0) return 0;
+  return Math.max(1, w - 60);
 }
 
 function roundTo2(n) {

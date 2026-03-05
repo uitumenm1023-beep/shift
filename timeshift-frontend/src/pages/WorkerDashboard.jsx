@@ -84,8 +84,9 @@ export default function WorkerDashboard() {
       <div className="row" style={{ marginBottom: 14 }}>
         <h1 className="h1" style={{ margin: 0 }}>Ажилтан</h1>
         {me && <span className="badge">{me.hourly_rate_mnt.toLocaleString()} ₮/цаг</span>}
-        <span className="badge">Амралт: 60 мин (автоматаар)</span>
-        {openShift ? <span className="badge">АЖИЛЛАЖ БАЙНА</span> : <span className="badge">ЧӨЛӨӨТЭЙ</span>}
+        <span className="badge">Амралт: 60 мин</span>
+        {/* ✅ Removed "ЧӨЛӨӨТЭЙ" badge completely */}
+        {openShift ? <span className="badge">АЖИЛЛАЖ БАЙНА</span> : null}
       </div>
 
       <div className="grid cols-2">
@@ -99,7 +100,7 @@ export default function WorkerDashboard() {
                 </div>
 
                 <button className="btn btnPrimary" onClick={checkOut} disabled={loading}>
-                  {loading ? "..." : "Тарах (Check Out)"}
+                  {loading ? "..." : "Тарах"}
                 </button>
               </>
             ) : (
@@ -115,7 +116,7 @@ export default function WorkerDashboard() {
                 </div>
 
                 <button className="btn btnPrimary" onClick={checkIn} disabled={loading}>
-                  {loading ? "..." : "Ирэх (Check In)"}
+                  {loading ? "..." : "Ирсэн"}
                 </button>
               </>
             )}
@@ -151,7 +152,7 @@ export default function WorkerDashboard() {
             <div className="col">
               <div className="row">
                 <span className="badge">Ажилласан: {summary.total_worked_minutes} мин</span>
-                <span className="badge">Цалин бодох: {summary.total_paid_minutes} мин</span>
+                <span className="badge">Цалин бодох: {summary.final_paid_minutes ?? summary.total_paid_minutes} мин</span>
               </div>
               <div className="row">
                 <span className="badge">Цаг: {summary.total_hours}</span>
