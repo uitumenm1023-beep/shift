@@ -10,6 +10,24 @@ function todayISO() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// ✅ Show only HH:MM in Mongolia time
+function formatHM(isoString) {
+  if (!isoString) return "-";
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) return "-";
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Ulaanbaatar",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const hh = parts.find(p => p.type === "hour")?.value ?? "--";
+  const mm = parts.find(p => p.type === "minute")?.value ?? "--";
+  return `${hh}:${mm}`; // ex: 08:00, 15:00
+}
+
 export default function WorkerDashboard() {
   const [me, setMe] = useState(null);
   const [openShift, setOpenShift] = useState(null);
@@ -85,7 +103,6 @@ export default function WorkerDashboard() {
         <h1 className="h1" style={{ margin: 0 }}>Ажилтан</h1>
         {me && <span className="badge">{me.hourly_rate_mnt.toLocaleString()} ₮/цаг</span>}
         <span className="badge">Амралт: 60 мин</span>
-        {/* ✅ Removed "ЧӨЛӨӨТЭЙ" badge completely */}
         {openShift ? <span className="badge">АЖИЛЛАЖ БАЙНА</span> : null}
       </div>
 
@@ -95,12 +112,12 @@ export default function WorkerDashboard() {
             {openShift ? (
               <>
                 <div className="row">
-                  <span className="badge">Ирсэн: {openShift.check_in_at || "-"}</span>
+                  <span className="badge">Ирсэн: {formatHM(openShift.check_in_at)}</span>
                   <span className="badge">Өдөр: {openShift.work_date}</span>
                 </div>
 
                 <button className="btn btnPrimary" onClick={checkOut} disabled={loading}>
-                  {loading ? "..." : "Тарах"}
+                  {loading ? "..." : "Тарах (Check Out)"}
                 </button>
               </>
             ) : (
@@ -116,7 +133,7 @@ export default function WorkerDashboard() {
                 </div>
 
                 <button className="btn btnPrimary" onClick={checkIn} disabled={loading}>
-                  {loading ? "..." : "Ирсэн"}
+                  {loading ? "..." : "Ирэх (Check In)"}
                 </button>
               </>
             )}
@@ -152,7 +169,9 @@ export default function WorkerDashboard() {
             <div className="col">
               <div className="row">
                 <span className="badge">Ажилласан: {summary.total_worked_minutes} мин</span>
-                <span className="badge">Цалин бодох: {summary.final_paid_minutes ?? summary.total_paid_minutes} мин</span>
+                <span className="badge">
+                  Цалин бодох: {summary.final_paid_minutes ?? summary.total_paid_minutes} мин
+                </span>
               </div>
               <div className="row">
                 <span className="badge">Цаг: {summary.total_hours}</span>
@@ -190,8 +209,8 @@ export default function WorkerDashboard() {
                 ) : shifts.map(s => (
                   <tr key={s.id}>
                     <td>{s.work_date}</td>
-                    <td>{s.check_in_at || "-"}</td>
-                    <td>{s.check_out_at || "-"}</td>
+                    <td>{formatHM(s.check_in_at)}</td>
+                    <td>{formatHM(s.check_out_at)}</td>
                     <td>{s.computed?.worked_minutes ?? 0} мин</td>
                     <td>{s.computed?.paid_minutes ?? 0} мин</td>
                     <td><b>{(s.computed?.pay_mnt ?? 0).toLocaleString()} ₮</b></td>
